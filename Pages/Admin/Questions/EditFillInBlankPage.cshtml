@@ -1,0 +1,97 @@
+@page
+@model DSA_PR25.Pages.Admin.Questions.EditFillInBlankPageModel
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Chỉnh sửa câu hỏi điền khuyết";
+}
+
+<h2> Chỉnh sửa câu hỏi điền khuyết</h2>
+
+<form method="post">
+    <input type="hidden" asp-for="Input.Id" />
+
+   <div class="mb-3">
+    <label class="form-label">Nội dung câu hỏi *</label>
+    <textarea asp-for="Input.Content"
+              id="questionContent"
+              class="form-control"
+              rows="4"
+              required
+              oninput="renderMathPreview('questionContent', 'previewContent')"></textarea>
+
+    <!-- Bàn phím toán học -->
+    @await Component.InvokeAsync("MathKeyboard")
+
+    <span asp-validation-for="Input.Content" class="text-danger"></span>
+
+    <!-- Khung xem trước công thức -->
+    <div class="mt-2 p-2 border rounded bg-light" id="previewContent" style="min-height: 30px;">
+        <span class="text-muted">Xem trước công thức toán...</span>
+    </div>
+</div>
+
+    <div class="mb-3">
+        <label class="form-label">Hình ảnh (URL)</label>
+        <input asp-for="Input.Img" class="form-control" placeholder="https://example.com/image.png" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Chương *</label>
+        <select asp-for="Input.ChapterId" class="form-select" required>
+            <option value="">-- Chọn chương --</option>
+            @foreach (var chapter in Model.Chapters)
+            {
+                <option value="@chapter.Id">@chapter.Name</option>
+            }
+        </select>
+        <span asp-validation-for="Input.ChapterId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Mức độ Bloom *</label>
+        <select asp-for="Input.BloomLevel" class="form-select" required>
+            <option value="r">Nhớ (Remember)</option>
+            <option value="u">Hiểu (Understand)</option>
+            <option value="ap">Áp dụng (Apply)</option>
+            <option value="an">Phân tích (Analyze)</option>
+        </select>
+    </div>
+
+   <div class="mb-3">
+    <label class="form-label">Đáp án đúng *</label>
+    <input asp-for="Input.CorrectAnswer"
+           id="questionCorrectAnswer"
+           class="form-control"
+           required
+           oninput="renderMathPreview('questionCorrectAnswer', 'previewCorrectAnswer')" />
+    
+    <!-- Bàn phím toán học -->
+    <vc:math-keyboard target-input-id="questionCorrectAnswer" />
+    
+    <span asp-validation-for="Input.CorrectAnswer" class="text-danger"></span>
+
+    <!-- Khung xem trước công thức toán -->
+    <div class="mt-2 p-2 border rounded bg-light" id="previewCorrectAnswer" style="min-height: 30px;">
+        <span class="text-muted">Xem trước công thức toán...</span>
+    </div>
+</div>
+
+    <div class="mb-3">
+        <label class="form-label">Sai số cho phép (chỉ dùng với số, ví dụ: 0.01)</label>
+        <input asp-for="Input.Tolerance" class="form-control" type="number" step="0.01" min="0" />
+        <small class="form-text text-muted">Nếu để trống → chỉ chấp nhận đáp án chính xác</small>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Từ đồng nghĩa (phân cách bằng dấu phẩy)</label>
+        <input asp-for="Input.Synonyms" class="form-control" placeholder="màu đỏ, đỏ, red" />
+        <small class="form-text text-muted">Ví dụ: "hạnh phúc, vui vẻ, sung sướng"</small>
+    </div>
+
+    <button type="submit" class="btn btn-warning"> Cập nhật</button>
+    <a asp-page="Index" class="btn btn-secondary"> Hủy</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

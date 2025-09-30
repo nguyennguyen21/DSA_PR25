@@ -1,0 +1,138 @@
+@page
+@model DSA_PR25.Pages.Questions.AddFillInBlankPageModel
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Thêm câu hỏi điền khuyết";
+}
+
+<h2>Thêm câu hỏi điền khuyết</h2>
+
+<form method="post">
+    <div class="mb-3">
+        <label class="form-label">Nội dung câu hỏi *</label>
+        <textarea asp-for="Input.Content"
+                  id="questionContent"
+                  class="form-control"
+                  rows="4"
+                  required
+                  oninput="renderMathPreview('questionContent', 'previewContent')"></textarea>
+        <!-- Gọi ViewComponent chỉ MỘT LẦN -->
+         @await Component.InvokeAsync("MathKeyboard", new { targetInputId = "questionContent" })
+        <span asp-validation-for="Input.Content" class="text-danger"></span>
+
+        <!-- Khung xem trước công thức -->
+        <div class="mt-2 p-2 border rounded bg-light" id="previewContent" style="min-height: 30px;">
+            <span class="text-muted">Xem trước công thức toán...</span>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Hình ảnh (URL)</label>
+        <input asp-for="Input.Img" class="form-control" placeholder="https://example.com/image.png" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Chương *</label>
+        <select asp-for="Input.ChapterId" class="form-select" required>
+            <option value="">-- Chọn chương --</option>
+            @foreach (var chapter in Model.Chapters)
+            {
+                <option value="@chapter.Id">@chapter.Name</option>
+            }
+        </select>
+        <span asp-validation-for="Input.ChapterId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Mức độ Bloom *</label>
+        <select asp-for="Input.BloomLevel" class="form-select" required>
+            <option value="r">Nhớ (Remember)</option>
+            <option value="u">Hiểu (Understand)</option>
+            <option value="ap">Áp dụng (Apply)</option>
+            <option value="an">Phân tích (Analyze)</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+    <label class="form-label">Đáp án đúng *</label>
+    <input asp-for="Input.CorrectAnswer"
+           id="questionCorrectAnswer"
+           class="form-control"
+           required
+           oninput="renderMathPreview('questionCorrectAnswer', 'previewCorrectAnswer')" />
+    
+    @await Component.InvokeAsync("MathKeyboard", new { targetInputId = "questionCorrectAnswer" })
+    <span asp-validation-for="Input.CorrectAnswer" class="text-danger"></span>
+
+    <!-- Khung xem trước đáp án -->
+    <div class="mt-2 p-2 border rounded bg-light" id="previewCorrectAnswer" style="min-height: 30px;">
+        <span class="text-muted">Xem trước công thức toán...</span>
+    </div>
+</div>
+
+    <div class="mb-3">
+        <label class="form-label">Sai số cho phép (chỉ dùng với số, ví dụ: 0.01)</label>
+        <input asp-for="Input.Tolerance" class="form-control" type="number" step="0.01" min="0" />
+        <small class="form-text text-muted">Nếu để trống → chỉ chấp nhận đáp án chính xác</small>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Từ đồng nghĩa (phân cách bằng dấu phẩy)</label>
+        <input asp-for="Input.Synonyms" class="form-control" placeholder="màu đỏ, đỏ, red" />
+        <small class="form-text text-muted">Ví dụ: "hạnh phúc, vui vẻ, sung sướng"</small>
+    </div>
+
+    <button type="submit" class="btn btn-success">Lưu câu hỏi</button>
+    <a asp-page="./Index" class="btn btn-secondary">Hủy</a>
+</form>
+
+<!-- MathJax để render công thức -->
+<script>
+    window.MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            processEscapes: true
+        },
+        startup: {
+            ready: () => {
+                MathJax.startup.defaultReady();
+            }
+        }
+    };
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function renderMathPreview(inputId, previewId) {
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
+            if (!input || !preview) return;
+
+            let value = input.value.trim();
+            if (!value) {
+                preview.innerHTML = '<span class="text-muted">Xem trước công thức toán...</span>';
+                return;
+            }
+
+            // Bao bằng $...$ để MathJax render inline
+            preview.innerHTML = '$' + value + '$';
+
+            // Yêu cầu MathJax render lại
+            if (window.MathJax) {
+                MathJax.typesetClear([preview]);
+                MathJax.typeset([preview]);
+            }
+        }
+
+        // Khởi tạo ban đầu
+        document.addEventListener('DOMContentLoaded', () => {
+            // Đảm bảo bàn phím không bị gắn sự kiện 2 lần (nếu có)
+            // Preview ban đầu
+            renderMathPreview('questionContent', 'previewContent');
+            renderMathPreview('questionCorrectAnswer', 'previewCorrectAnswer');
+        });
+    </script>
+}

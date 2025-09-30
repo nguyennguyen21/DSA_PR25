@@ -1,0 +1,234 @@
+@model DSA_PR25.ViewComponents.MathKeyboardModel
+
+@{
+    var symbols = new[]
+    {
+        // ───── Hằng số & Số ─────
+        @"\pi", @"\e", @"\i", @"\infty", @"\varnothing",
+
+        // ───── Phép toán cơ bản ─────
+        "+", "-", @"\pm", @"\mp", @"\times", @"\div", @"\cdot",
+
+        // ───── Quan hệ ─────
+        "=", @"\ne", @"<", @">", @"\le", @"\ge", @"\approx", @"\equiv",
+
+        // ───── Căn & Lũy thừa ─────
+        @"\sqrt{}", @"\sqrt[3]{}", @"\sqrt[n]{}",
+        "^0", "^1", "^2", "^3", "^4", "^5", "^6", "^7", "^8", "^9",
+        "^+", "^-", "^=", "^n", "^{}", @"^\circ",
+
+        // ───── Phân số & Tổ hợp ─────
+        @"\frac{}{}", @"\binom{}{}", @"!",
+
+        // ───── Tập hợp ─────
+        @"\in", @"\notin", @"\subset", @"\subseteq", @"\cup", @"\cap", @"\mathbb{R}", @"\mathbb{Z}",
+
+        // ───── Logic & Giải tích ─────
+        @"\forall", @"\exists", @"\Rightarrow", @"\Leftrightarrow",
+        @"\sum", @"\prod", @"\int", @"\partial", @"\nabla", @"\Delta",
+
+        // ───── Hình học ─────
+        @"\angle", @"\perp", @"\parallel", @"\triangle"
+    };
+}
+
+<div class="math-keyboard-component" data-target="@Model.TargetInputId">
+    @foreach (var symbol in symbols)
+    {
+        var displayText = symbol
+            // --- Hằng số ---
+            .Replace(@"\pi", "π")
+            .Replace(@"\e", "e")
+            .Replace(@"\infty", "∞")
+            .Replace(@"\varnothing", "∅")
+
+            // --- Phép toán ---
+            .Replace(@"\pm", "±")
+            .Replace(@"\mp", "∓")
+            .Replace(@"\times", "×")
+            .Replace(@"\div", "÷")
+            .Replace(@"\cdot", "⋅")
+
+            // --- Quan hệ ---
+            .Replace(@"\ne", "≠")
+            .Replace(@"\le", "≤")
+            .Replace(@"\ge", "≥")
+            .Replace(@"\approx", "≈")
+            .Replace(@"\equiv", "≡")
+
+            // --- Căn ---
+            .Replace(@"\sqrt{}", "√")
+            .Replace(@"\sqrt[3]{}", "∛")
+            .Replace(@"\sqrt[n]{}", "∜")
+
+            // --- Số mũ Unicode ---
+            .Replace("^0", "⁰")
+            .Replace("^1", "¹")
+            .Replace("^2", "²")
+            .Replace("^3", "³")
+            .Replace("^4", "⁴")
+            .Replace("^5", "⁵")
+            .Replace("^6", "⁶")
+            .Replace("^7", "⁷")
+            .Replace("^8", "⁸")
+            .Replace("^9", "⁹")
+            .Replace("^+", "⁺")
+            .Replace("^-", "⁻")
+            .Replace("^=", "⁼")
+            .Replace("^n", "ⁿ")
+            .Replace(@"^\circ", "°")
+
+            // --- Phân số & Tổ hợp ---
+            .Replace(@"\frac{}{}", "a/b")
+            .Replace(@"\binom{}{}", "C")
+
+            // --- Tập hợp ---
+            .Replace(@"\in", "∈")
+            .Replace(@"\notin", "∉")
+            .Replace(@"\subset", "⊂")
+            .Replace(@"\subseteq", "⊆")
+            .Replace(@"\cup", "∪")
+            .Replace(@"\cap", "∩")
+            .Replace(@"\mathbb{R}", "ℝ")
+            .Replace(@"\mathbb{Z}", "ℤ")
+
+            // --- Logic & Giải tích ---
+            .Replace(@"\forall", "∀")
+            .Replace(@"\exists", "∃")
+            .Replace(@"\Rightarrow", "⇒")
+            .Replace(@"\Leftrightarrow", "⇔")
+            .Replace(@"\sum", "∑")
+            .Replace(@"\prod", "∏")
+            .Replace(@"\int", "∫")
+            .Replace(@"\partial", "∂")
+            .Replace(@"\nabla", "∇")
+            .Replace(@"\Delta", "Δ")
+
+            // --- Hình học ---
+            .Replace(@"\angle", "∠")
+            .Replace(@"\perp", "⊥")
+            .Replace(@"\parallel", "∥")
+            .Replace(@"\triangle", "△");
+
+        <button type="button" class="math-key" data-symbol="@symbol">@Html.Raw(displayText)</button>
+    }
+
+    <button type="button" class="math-key special" onclick="clearMathInput('@Model.TargetInputId')">Xóa</button>
+    <button type="button" class="math-key special" onclick="backspaceMathInput('@Model.TargetInputId')">⌫</button>
+</div>
+
+<style>
+    .math-keyboard-component {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+        gap: 5px;
+        padding: 12px;
+        background: #f9f9f9;
+        border-radius: 8px;
+        margin-top: 12px;
+        max-width: 800px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    .math-key {
+        padding: 10px 2px;
+        font-size: 15px;
+        text-align: center;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+        line-height: 1.2;
+    }
+    .math-key:hover {
+        background: #e3f2fd;
+        border-color: #2196f3;
+        transform: translateY(-1px);
+    }
+    .special {
+        background: #ffeb3b !important;
+        font-weight: bold;
+        color: #333;
+    }
+</style>
+
+<script>
+    // Đảm bảo script chỉ chạy một lần (tránh xung đột khi có nhiều bàn phím)
+    (function () {
+        if (window.MathKeyboardInitialized) return;
+        window.MathKeyboardInitialized = true;
+
+        // Hàm chèn ký hiệu
+        window.insertMathSymbol = function (inputId, symbol) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const start = input.selectionStart || 0;
+            const end = input.selectionEnd || 0;
+            const text = input.value;
+            let newText = text.substring(0, start) + symbol + text.substring(end);
+            let cursorPos = start + symbol.length;
+
+            if (symbol.includes('{}')) {
+                newText = text.substring(0, start) + symbol.replace('{}', '{|}') + text.substring(end);
+                cursorPos = start + symbol.indexOf('{') + 1;
+            }
+
+            input.value = newText.replace('|', '');
+            input.focus();
+            input.setSelectionRange(cursorPos, cursorPos);
+
+            // Kích hoạt sự kiện 'input' để các listener (preview, validation) nhận biết
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+        };
+
+        window.clearMathInput = function (inputId) {
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.value = '';
+                input.focus();
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        };
+
+        window.backspaceMathInput = function (inputId) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+            const text = input.value;
+            if (start === end && start > 0) {
+                input.value = text.substring(0, start - 1) + text.substring(end);
+                input.focus();
+                input.setSelectionRange(start - 1, start - 1);
+            } else {
+                input.value = text.substring(0, start) + text.substring(end);
+                input.focus();
+                input.setSelectionRange(start, start);
+            }
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+        };
+
+        // Gắn sự kiện cho các nút (chỉ 1 lần)
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.math-keyboard-component').forEach(container => {
+                container.querySelectorAll('.math-key[data-symbol]').forEach(btn => {
+                    if (!btn.dataset.initialized) {
+                        btn.addEventListener('click', function () {
+                            const symbol = this.dataset.symbol;
+                            const targetId = this.closest('.math-keyboard-component').dataset.target;
+                            window.insertMathSymbol(targetId, symbol);
+
+                            // Tự động gọi preview nếu tồn tại hàm renderMathPreview
+                            if (typeof window.renderMathPreview === 'function') {
+                                // Tạo ID preview: ví dụ "questionContent" → "previewContent"
+                                const previewId = 'preview' + targetId.charAt(0).toUpperCase() + targetId.slice(1);
+                                window.renderMathPreview(targetId, previewId);
+                            }
+                        });
+                        btn.dataset.initialized = 'true';
+                    }
+                });
+            });
+        });
+    })();
+</script>

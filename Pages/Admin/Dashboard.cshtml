@@ -1,0 +1,28 @@
+@page
+@model DSA_PR25.Pages.Admin.DashboardModel
+@using DSA_PR25.Models
+@{
+    Layout = "_LayoutAdmin"; // hoặc "_Layout" nếu chưa có layout riêng
+    ViewData["Title"] = "Admin Console";
+}
+
+<h1>Admin Console</h1>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card border-primary mb-3">
+            <div class="card-header">Total Users</div>
+            <div class="card-body text-primary">
+                <h5 class="card-title">@Model.TotalUsers</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-success mb-3">
+            <div class="card-header">Total Exams</div>
+            <div class="card-body text-success">
+                <h5 class="card-title">@Model.TotalExams</h5>
+            </div>
+        </div>
+    </div>
+</div>

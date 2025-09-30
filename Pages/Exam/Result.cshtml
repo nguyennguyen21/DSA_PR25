@@ -1,0 +1,15 @@
+@page
+@model DSA_PR25.Pages.Exam.ResultModel
+@{
+    ViewData["Title"] = "Kết quả thi";
+}
+
+<div class="alert alert-success">
+    <h3>Kết quả bài thi</h3>
+    <p><strong>Tổng câu:</strong> @Model.Result.TotalQuestions</p>
+    <p><strong>Đúng:</strong> @Model.Result.CorrectAnswers</p>
+    <p><strong>Điểm Bloom:</strong> @Model.Result.TotalScore.ToString("F2")</p>
+</div>
+
+<a href="/Exam/Setup" class="btn btn-primary">Làm bài khác</a>
+<a href="/Profile/Progress" class="btn btn-secondary">Xem tiến độ</a>

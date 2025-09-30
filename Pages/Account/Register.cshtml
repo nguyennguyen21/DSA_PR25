@@ -1,0 +1,30 @@
+@page
+@model DSA_PR25.Pages.Account.Register
+@{
+    ViewData["Title"] = "Register";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<form method="post">
+    <div>
+        <label>Username:</label>
+        <input asp-for="Input.Username" />
+        <span asp-validation-for="Input.Username"></span>
+    </div>
+    <div>
+        <label>Full Name:</label>
+        <input asp-for="Input.Fullname" />
+        <span asp-validation-for="Input.Fullname"></span>
+    </div>
+    <div>
+        <label>Password:</label>
+        <input asp-for="Input.Password" type="password" />
+        <span asp-validation-for="Input.Password"></span>
+    </div>
+    <button type="submit">Register</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,64 @@
+@page
+@model DSA_PR25.Pages.Admin.Questions.SeenMCQModel
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Danh sách câu hỏi trắc nghiệm";
+}
+
+<h2>Danh sách câu hỏi trắc nghiệm (MCQ)</h2>
+
+<div class="mb-3">
+    <a asp-page="/Admin/Questions/MQC/CreateMCQ" class="btn btn-primary">Thêm câu hỏi</a>
+</div>
+
+@if (Model.MCQList.Count == 0)
+{
+    <div class="alert alert-info">Chưa có câu hỏi trắc nghiệm nào.</div>
+}
+else
+{
+    <div class="row">
+        @foreach (var item in Model.MCQList)
+        {
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <strong>Chương:</strong> @(item.Question.Chapter?.Name ?? "Không có")
+                        <span class="badge bg-info ms-2">Bloom: @item.Question.BloomLevel</span>
+                    </div>
+                    <div class="card-body">
+                        @if (!string.IsNullOrEmpty(item.Question.Img))
+                        {
+                            <img src="@item.Question.Img" class="img-fluid mb-2" style="max-height: 200px; object-fit: contain;" />
+                        }
+                        <p class="fw-bold">@item.Question.Content</p>
+
+                        <ul class="list-group mb-3">
+                            <li class="list-group-item @(item.CorrectAnswers.Contains("A") ? "list-group-item-success" : "")">A. @item.MCQ?.OptionA</li>
+                            <li class="list-group-item @(item.CorrectAnswers.Contains("B") ? "list-group-item-success" : "")">B. @item.MCQ?.OptionB</li>
+                            @if (!string.IsNullOrEmpty(item.MCQ?.OptionC))
+                            {
+                                <li class="list-group-item @(item.CorrectAnswers.Contains("C") ? "list-group-item-success" : "")">C. @item.MCQ.OptionC</li>
+                            }
+                            @if (!string.IsNullOrEmpty(item.MCQ?.OptionD))
+                            {
+                                <li class="list-group-item @(item.CorrectAnswers.Contains("D") ? "list-group-item-success" : "")">D. @item.MCQ.OptionD</li>
+                            }
+                        </ul>
+                        
+                        <form method="post" asp-page-handler="Delete" style="display:inline;">
+                            <input type="hidden" name="id" value="@item.Question.Id" />
+                            <button type="submit" class="btn btn-danger btn-sm"
+                                    onclick="return confirm('Bạn có chắc muốn xóa câu hỏi này? Hành động không thể hoàn tác!');">
+                                Xóa
+                            </button>
+                        </form>
+                        <a asp-page="/Admin/Questions/MQC/EditMCQ" asp-route-id="@item.Question.Id" class="btn btn-warning btn-sm me-2">
+                          Sửa
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

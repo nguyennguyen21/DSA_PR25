@@ -1,0 +1,34 @@
+@page
+@model DSA_PR25.Pages.Exam.SetupModel
+@{
+    ViewData["Title"] = "Tạo đề thi";
+}
+
+<h2>Chọn cấu hình đề thi</h2>
+
+<form method="post">
+    <div class="mb-3">
+        <label asp-for="Input.ChapterId" class="form-label">Chương</label>
+        <select asp-for="Input.ChapterId" class="form-control" asp-items="Model.Chapters"></select>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Mức độ Bloom</label><br />
+        @foreach (var level in Model.BloomLevels)
+        {
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="Input.BloomLevel" value="@level.Value" 
+                       id="bloom_@level.Value" @(Model.Input.BloomLevel == level.Value ? "checked" : "") />
+                <label class="form-check-label" for="bloom_@level.Value">@level.Text</label>
+            </div>
+        }
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Input.QuestionCount" class="form-label">Số câu hỏi (1–20)</label>
+        <input asp-for="Input.QuestionCount" class="form-control" min="1" max="20" />
+        <span asp-validation-for="Input.QuestionCount" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Bắt đầu thi</button>
+</form>

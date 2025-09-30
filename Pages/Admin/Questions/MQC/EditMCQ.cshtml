@@ -1,0 +1,93 @@
+@page "{id:guid}"
+@model DSA_PR25.Pages.Admin.Questions.MQC.EditMCQModel
+@{
+    ViewData["Title"] = "Sửa câu hỏi trắc nghiệm";
+}
+
+<h2>Sửa câu hỏi trắc nghiệm</h2>
+
+<form method="post">
+    <input type="hidden" asp-for="Input.Id" />
+
+    <div class="form-group mb-3">
+        <label asp-for="Input.ChapterId">Chương</label>
+        <select asp-for="Input.ChapterId" asp-items="Model.ChapterList" class="form-control"></select>
+        <span asp-validation-for="Input.ChapterId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Input.BloomLevel">Mức độ Bloom</label>
+        <select asp-for="Input.BloomLevel" class="form-control">
+            <option value="r">Remember (Nhớ)</option>
+            <option value="u">Understand (Hiểu)</option>
+            <option value="ap">Apply (Áp dụng)</option>
+            <option value="an">Analyze (Phân tích)</option>
+        </select>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Input.Content">Nội dung câu hỏi</label>
+        <textarea asp-for="Input.Content" class="form-control" rows="3"></textarea>
+        <span asp-validation-for="Input.Content" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Input.Img">URL Hình ảnh (tùy chọn)</label>
+        <input asp-for="Input.Img" class="form-control" />
+    </div>
+
+    <h4>Đáp án</h4>
+    <div class="form-group mb-3">
+        <label>A</label>
+        <input asp-for="Input.OptionA" class="form-control" />
+        <span asp-validation-for="Input.OptionA" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label>B</label>
+        <input asp-for="Input.OptionB" class="form-control" />
+        <span asp-validation-for="Input.OptionB" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label>C</label>
+        <input asp-for="Input.OptionC" class="form-control" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label>D</label>
+        <input asp-for="Input.OptionD" class="form-control" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label>Đáp án đúng</label><br />
+        <div class="form-check">
+            <input type="checkbox" name="Input.CorrectOptions" value="A" class="form-check-input" id="optA"
+                   @(Model.Input.CorrectOptions.Contains("A") ? "checked" : "") />
+            <label class="form-check-label" for="optA">A</label>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" name="Input.CorrectOptions" value="B" class="form-check-input" id="optB"
+                   @(Model.Input.CorrectOptions.Contains("B") ? "checked" : "") />
+            <label class="form-check-label" for="optB">B</label>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" name="Input.CorrectOptions" value="C" class="form-check-input" id="optC"
+                   @(Model.Input.CorrectOptions.Contains("C") ? "checked" : "") />
+            <label class="form-check-label" for="optC">C</label>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" name="Input.CorrectOptions" value="D" class="form-check-input" id="optD"
+                   @(Model.Input.CorrectOptions.Contains("D") ? "checked" : "") />
+            <label class="form-check-label" for="optD">D</label>
+        </div>
+        <span asp-validation-for="Input.CorrectOptions" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Cập nhật</button>
+    <a asp-page="../SeenMCQ" class="btn btn-secondary">Hủy</a>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
