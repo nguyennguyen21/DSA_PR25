@@ -1,0 +1,183 @@
+@page
+@model DSA_PR25.Pages.Rank.RankModel
+@{
+    ViewData["Title"] = "Bảng Xếp Hạng";
+    Layout ="_Layout";
+}
+
+<style>
+    :root {
+        --primary: #000000;
+        --secondary: #FFFFFF;
+        --accent: #9112BC;
+        --shadow: 8px 8px 0px var(--primary);
+        --gold: #FFD700;
+        --silver: #C0C0C0;
+        --bronze: #CD7F32;
+    }
+
+    body {
+        background-color: #f9f9f9;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .rank-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .rank-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .rank-header h1 {
+        font-family: 'Courier New', monospace;
+        font-size: 2.5rem;
+        color: var(--primary);
+        text-shadow: var(--shadow);
+        margin: 0;
+        letter-spacing: 2px;
+    }
+
+    .rank-box {
+        background: white;
+        border: 2px solid var(--primary);
+        box-shadow: var(--shadow);
+        font-family: 'Courier New', monospace;
+        padding: 1.5rem;
+        border-radius: 0;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+    th, td {
+        padding: 12px 10px;
+        text-align: center;
+        border: 1px solid var(--primary);
+    }
+
+    th {
+        background-color: #f0f0f0;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.9rem;
+    }
+
+    tr:nth-child(1) td:first-child {
+        color: var(--gold);
+        font-weight: bold;
+        font-size: 1.4em;
+    }
+    tr:nth-child(2) td:first-child {
+        color: var(--silver);
+        font-weight: bold;
+        font-size: 1.3em;
+    }
+    tr:nth-child(3) td:first-child {
+        color: var(--bronze);
+        font-weight: bold;
+        font-size: 1.2em;
+    }
+
+    .medal {
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        margin-right: 6px;
+        vertical-align: middle;
+    }
+
+    .gold { background-color: var(--gold); }
+    .silver { background-color: var(--silver); }
+    .bronze { background-color: var(--bronze); }
+
+    .rank-number {
+        font-weight: bold;
+        min-width: 40px;
+    }
+
+    .username {
+        font-weight: 600;
+        color: var(--accent);
+    }
+
+    .score {
+        font-weight: bold;
+        color: var(--primary);
+    }
+
+    .no-data {
+        text-align: center;
+        padding: 2rem;
+        color: #666;
+        font-style: italic;
+    }
+
+    @@media (max-width: 600px) {
+        .rank-box {
+            padding: 1rem;
+        }
+        th, td {
+            padding: 8px 6px;
+            font-size: 0.85rem;
+        }
+        .rank-header h1 {
+            font-size: 2rem;
+        }
+    }
+</style>
+
+<div class="rank-container">
+    <div class="rank-header">
+        <h1>@ViewData["Title"]</h1>
+    </div>
+
+    <div class="rank-box">
+        @if (Model.RankList.Any())
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>Hạng</th>
+                        <th>Người dùng</th>
+                        <th>Họ và tên</th>
+                        <th>Điểm</th>
+                        <th>Ngày thi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.RankList)
+                    {
+                        <tr>
+                            <td class="rank-number">
+                                @if (item.Rank <= 3)
+                                {
+                                    <span class="medal @(item.Rank == 1 ? "gold" : item.Rank == 2 ? "silver" : "bronze")"></span>
+                                }
+                                @item.Rank
+                            </td>
+                            <td class="username">@item.Username</td>
+                            <td>@item.Fullname</td>
+                            <td class="score">@item.TotalScore.ToString("F2")</td>
+                            <td>@(item.ExamDate?.ToString("dd/MM/yyyy") ?? "—")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="no-data">
+                🏆 Chưa có ai tham gia kỳ thi. Hãy là người đầu tiên!
+            </div>
+        }
+    </div>
+</div>

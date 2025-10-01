@@ -4,11 +4,12 @@ using Microsoft.EntityFrameworkCore;
 using DSA_PR25.Models;
 using DSA_PR25.Data;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.AspNetCore.Authorization;
 namespace DSA_PR25.Pages.Profile;
-
+[Authorize]
 public class ProgressModel : PageModel
 {
+    
     private readonly ApplicationDBcontext _context;
 
     public ProgressModel(ApplicationDBcontext context)
@@ -24,7 +25,7 @@ public class ProgressModel : PageModel
     public async Task<IActionResult> OnGetAsync()
     {
         // ✅ Lấy UserId từ Claims (sau khi đăng nhập)
-        var userIdStr = User.FindFirst("Id")?.Value; // hoặc "sub" nếu dùng JWT
+         var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
         if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out Guid userId))
         {

@@ -2,65 +2,122 @@
 @model DSA_PR25.Pages.Exam.AttemptModel
 @{
     ViewData["Title"] = "Làm bài thi";
+    Layout = "_Layout";
 }
 
-<h2>Làm bài thi</h2>
+<h2 class="mb-4">Làm bài thi</h2>
 
 <form method="post">
     @for (int i = 0; i < Model.Questions.Count; i++)
     {
         var q = Model.Questions[i];
-        <div class="card mb-3">
+        <div class="card mb-4 shadow-sm">
             <div class="card-body">
-                <h5>Câu @($"{i + 1}")</h5>
+                <h5 class="mb-3">Câu @($"{i + 1}")</h5>
+                
                 @if (!string.IsNullOrEmpty(q.Img))
                 {
-                    <img src="@q.Img" class="img-fluid mb-2" />
+                    <img src="@q.Img" class="img-fluid mb-3 rounded" alt="Hình minh họa" />
                 }
-                <p>@Html.Raw(q.Content)</p>
+
+                <!-- HIỂN THỊ CÂU HỎI CÓ TOÁN HỌC -->
+                <div class="tex2jax_process mb-3">
+                   <p>@Html.Raw(q.Content)</p>
+                </div>
 
                 @if (q.Type == "mcq")
                 {
                     <input type="hidden" name="Answers[@i].QuestionId" value="@q.Id" />
-                    <div>
-                        @if (!string.IsNullOrEmpty(q.Options[0]))
+                    <div class="ms-3">
+                        @for (int j = 0; j < q.Options.Length; j++)
                         {
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="Answers[@i].Response" value="A" id="q@(i)_A" />
-                                <label class="form-check-label" for="q@(i)_A">A. @q.Options[0]</label>
-                            </div>
-                        }
-                        @if (!string.IsNullOrEmpty(q.Options[1]))
-                        {
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="Answers[@i].Response" value="B" id="q@(i)_B" />
-                                <label class="form-check-label" for="q@(i)_B">B. @q.Options[1]</label>
-                            </div>
-                        }
-                        @if (!string.IsNullOrEmpty(q.Options[2]))
-                        {
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="Answers[@i].Response" value="C" id="q@(i)_C" />
-                                <label class="form-check-label" for="q@(i)_C">C. @q.Options[2]</label>
-                            </div>
-                        }
-                        @if (!string.IsNullOrEmpty(q.Options[3]))
-                        {
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="Answers[@i].Response" value="D" id="q@(i)_D" />
-                                <label class="form-check-label" for="q@(i)_D">D. @q.Options[3]</label>
-                            </div>
+                            var option = q.Options[j];
+                            if (!string.IsNullOrEmpty(option))
+                            {
+                                var letter = (char)('A' + j);
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio"
+                                           name="Answers[@i].Response"
+                                           value="@letter"
+                                           id="q@(i)_@letter" />
+                                    <label class="form-check-label tex2jax_process" for="q@(i)_@letter">
+                                        @letter. @Html.Raw(option)
+                                    </label>
+                                </div>
+                            }
                         }
                     </div>
                 }
-                else
+                else // fill-in-the-blank
                 {
                     <input type="hidden" name="Answers[@i].QuestionId" value="@q.Id" />
-                    <input type="text" name="Answers[@i].Response" class="form-control" placeholder="Nhập đáp án..." />
+                    
+                    <!-- Ô nhập đáp án -->
+                    <input type="text"
+                           name="Answers[@i].Response"
+                           id="answer_@i"
+                           class="form-control mb-2"
+                           placeholder="Nhập đáp án (ví dụ: 2, \sqrt{4}, \frac{1}{2}, v.v.)" />
+
+                    <!-- Preview đáp án -->
+                    <div class="mt-2 p-2 bg-light rounded border">
+                        <small>
+                            <strong>Preview:</strong>
+                            <span id="preview_span_@i" class="tex2jax_process">Chưa nhập</span>
+                        </small>
+                    </div>
+
+                    <!-- Bàn phím toán học -->
+                    @(await Component.InvokeAsync<DSA_PR25.ViewComponents.MathKeyboardViewComponent>(new { TargetInputId = $"answer_{i}" }))
                 }
             </div>
         </div>
     }
 
-    <button type="submit" class="btn btn-success">Nộp bài</button>
+    <div class="d-grid">
+        <button type="submit" class="btn btn-success btn-lg">Nộp bài</button>
+    </div>
 </form>
+
+<!-- Script hỗ trợ preview LaTeX -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Hàm render preview bằng MathJax
+        window.renderMathPreview = function (inputId, previewSpanId) {
+            const input = document.getElementById(inputId);
+            const previewSpan = document.getElementById(previewSpanId);
+            if (!input || !previewSpan) return;
+
+            const value = input.value.trim();
+            if (!value) {
+                previewSpan.textContent = 'Chưa nhập';
+                return;
+            }
+
+            // Bao trong $...$ để render inline
+            const latex = '$' + value + '$';
+            previewSpan.textContent = ''; // Xóa nội dung cũ
+            previewSpan.innerHTML = latex;
+
+            // Yêu cầu MathJax render
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise([previewSpan]).catch(console.error);
+            }
+        };
+
+        // Gắn sự kiện cho tất cả ô điền khuyết
+        document.querySelectorAll('input[id^="answer_"]').forEach(input => {
+            const id = input.id;
+            const index = id.split('_')[1];
+            const previewId = 'preview_span_' + index;
+
+            // Render ban đầu
+            renderMathPreview(id, previewId);
+
+            // Cập nhật khi gõ
+            input.addEventListener('input', () => {
+                renderMathPreview(id, previewId);
+            });
+        });
+    });
+</script>

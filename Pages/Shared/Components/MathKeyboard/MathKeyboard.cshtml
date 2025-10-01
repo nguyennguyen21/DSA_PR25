@@ -152,83 +152,133 @@
     }
 </style>
 
+
 <script>
-    // Đảm bảo script chỉ chạy một lần (tránh xung đột khi có nhiều bàn phím)
-    (function () {
-        if (window.MathKeyboardInitialized) return;
-        window.MathKeyboardInitialized = true;
+(function () {
+    if (window.MathKeyboardInitialized) return;
+    window.MathKeyboardInitialized = true;
 
-        // Hàm chèn ký hiệu
-        window.insertMathSymbol = function (inputId, symbol) {
-            const input = document.getElementById(inputId);
-            if (!input) return;
-            const start = input.selectionStart || 0;
-            const end = input.selectionEnd || 0;
-            const text = input.value;
-            let newText = text.substring(0, start) + symbol + text.substring(end);
-            let cursorPos = start + symbol.length;
+    // ─── Utility: Check if string contains math symbols ───────────────
+    function containsMathSymbols(str) {
+        const mathPatterns = [
+            /\\\w+/,      // \pi, \sqrt, \frac, etc.
+            /\^/,         // superscript
+            /_{/,         // subscript
+            /[{}[\]]/,    // braces/brackets
+            /[∑∫∏∞∈∂∇Δ≠≤≥≈≡∀∃⇒⇔∠⊥∥△∅ℝℤ∪∩⊂⊆]/  // common math Unicode
+        ];
+        return mathPatterns.some(pattern => pattern.test(str));
+    }
 
-            if (symbol.includes('{}')) {
-                newText = text.substring(0, start) + symbol.replace('{}', '{|}') + text.substring(end);
-                cursorPos = start + symbol.indexOf('{') + 1;
-            }
+    // ─── Auto-format input with $...$ when needed ─────────────────────
+    window.formatMathInput = function(inputId) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
 
-            input.value = newText.replace('|', '');
+        let value = input.value.trim();
+        const hadDollar = value.startsWith('$') && value.endsWith('$');
+        const hasMath = containsMathSymbols(value.replace(/^\$|\$$/g, '')); // ignore existing $
+
+        if (hasMath && !hadDollar) {
+            input.value = '$' + value + '$';
+            // Place cursor before closing $
+            input.setSelectionRange(value.length + 1, value.length + 1);
+        } else if (!hasMath && hadDollar) {
+            input.value = value.substring(1, value.length - 1);
+            input.setSelectionRange(input.value.length, input.value.length);
+        }
+
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+    };
+
+    // ─── Insert symbol with smart cursor placement ────────────────────
+    window.insertMathSymbol = function (inputId, symbol) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+
+        const start = input.selectionStart || 0;
+        const end = input.selectionEnd || 0;
+        const text = input.value;
+
+        let newText, cursorPos;
+
+        // Handle placeholders for {} and []
+        if (symbol.includes('{}')) {
+            newText = text.substring(0, start) + symbol.replace('{}', '{•}') + text.substring(end);
+            cursorPos = start + symbol.indexOf('{') + 1;
+        } else if (symbol.includes('[]')) {
+            newText = text.substring(0, start) + symbol.replace('[]', '[•]') + text.substring(end);
+            cursorPos = start + symbol.indexOf('[') + 1;
+        } else {
+            newText = text.substring(0, start) + symbol + text.substring(end);
+            cursorPos = start + symbol.length;
+        }
+
+        input.value = newText.replace('•', '');
+        input.focus();
+        input.setSelectionRange(cursorPos, cursorPos);
+
+        // Auto-format (e.g., wrap in $...$)
+        setTimeout(() => window.formatMathInput(inputId), 0);
+    };
+
+    // ─── Clear input ──────────────────────────────────────────────────
+    window.clearMathInput = function (inputId) {
+        const input = document.getElementById(inputId);
+        if (input) {
+            input.value = '';
             input.focus();
-            input.setSelectionRange(cursorPos, cursorPos);
-
-            // Kích hoạt sự kiện 'input' để các listener (preview, validation) nhận biết
             input.dispatchEvent(new Event('input', { bubbles: true }));
-        };
+        }
+    };
 
-        window.clearMathInput = function (inputId) {
-            const input = document.getElementById(inputId);
-            if (input) {
-                input.value = '';
-                input.focus();
-                input.dispatchEvent(new Event('input', { bubbles: true }));
+    // ─── Backspace with selection support ─────────────────────────────
+    window.backspaceMathInput = function (inputId) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+
+        const start = input.selectionStart;
+        const end = input.selectionEnd;
+        const text = input.value;
+
+        if (start === end && start > 0) {
+            input.value = text.substring(0, start - 1) + text.substring(end);
+            input.focus();
+            input.setSelectionRange(start - 1, start - 1);
+        } else {
+            input.value = text.substring(0, start) + text.substring(end);
+            input.focus();
+            input.setSelectionRange(start, start);
+        }
+        setTimeout(() => window.formatMathInput(inputId), 0);
+    };
+
+    // ─── Auto-format on manual typing (for answer inputs) ─────────────
+    document.addEventListener('input', function(e) {
+        if (e.target.matches('input[id^="answer_"]')) {
+            setTimeout(() => window.formatMathInput(e.target.id), 0);
+        }
+    });
+
+    // ─── Handle button clicks via event delegation ────────────────────
+    document.addEventListener('click', function (e) {
+        if (e.target.matches('.math-key[data-symbol]')) {
+            const btn = e.target;
+            const symbol = btn.dataset.symbol;
+            const container = btn.closest('.math-keyboard-component');
+            const targetId = container?.dataset.target;
+
+            if (targetId) {
+                window.insertMathSymbol(targetId, symbol);
+
+                // Optional: trigger preview if available
+                if (typeof window.renderMathPreview === 'function') {
+                    // Adjust preview ID logic as needed
+                    const previewId = 'preview_span_' + targetId.split('_').pop();
+                    window.renderMathPreview(targetId, previewId);
+                }
             }
-        };
-
-        window.backspaceMathInput = function (inputId) {
-            const input = document.getElementById(inputId);
-            if (!input) return;
-            const start = input.selectionStart;
-            const end = input.selectionEnd;
-            const text = input.value;
-            if (start === end && start > 0) {
-                input.value = text.substring(0, start - 1) + text.substring(end);
-                input.focus();
-                input.setSelectionRange(start - 1, start - 1);
-            } else {
-                input.value = text.substring(0, start) + text.substring(end);
-                input.focus();
-                input.setSelectionRange(start, start);
-            }
-            input.dispatchEvent(new Event('input', { bubbles: true }));
-        };
-
-        // Gắn sự kiện cho các nút (chỉ 1 lần)
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('.math-keyboard-component').forEach(container => {
-                container.querySelectorAll('.math-key[data-symbol]').forEach(btn => {
-                    if (!btn.dataset.initialized) {
-                        btn.addEventListener('click', function () {
-                            const symbol = this.dataset.symbol;
-                            const targetId = this.closest('.math-keyboard-component').dataset.target;
-                            window.insertMathSymbol(targetId, symbol);
-
-                            // Tự động gọi preview nếu tồn tại hàm renderMathPreview
-                            if (typeof window.renderMathPreview === 'function') {
-                                // Tạo ID preview: ví dụ "questionContent" → "previewContent"
-                                const previewId = 'preview' + targetId.charAt(0).toUpperCase() + targetId.slice(1);
-                                window.renderMathPreview(targetId, previewId);
-                            }
-                        });
-                        btn.dataset.initialized = 'true';
-                    }
-                });
-            });
-        });
-    })();
+        }
+    }, true);
+})();
 </script>

@@ -1,0 +1,95 @@
+@page
+@model DSA_PR25.Pages.Profile.StatisticsModel
+@{
+    ViewData["Title"] = "Thống kê tiến độ học tập";
+}
+
+<div class="container mt-4">
+    <h2><i class="bi bi-bar-chart-line"></i> Thống kê tiến độ học tập</h2>
+    <hr />
+
+    <!-- Form tìm kiếm & lọc -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-6">
+                    <label for="SearchTerm" class="form-label">Tìm kiếm theo tên hoặc ID</label>
+                    <input type="text" class="form-control" id="SearchTerm" name="SearchTerm" value="@Model.SearchTerm" placeholder="Nhập tên, username hoặc ID...">
+                </div>
+                <div class="col-md-3">
+                    <label for="TopN" class="form-label">Số lượng top</label>
+                    <input type="number" class="form-control" id="TopN" name="TopN" value="@Model.TopN" min="1" max="100">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Tìm kiếm
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bảng thống kê -->
+    @if (Model.UserStatsList.Any())
+    {
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Top @Model.TopN người dùng có số lần làm bài nhiều nhất</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Họ tên</th>
+                                <th>Username</th>
+                                <th>Badge</th>
+                                <th>Số lần làm bài</th>
+                                <th>Điểm TB</th>
+                                <th>Điểm cao nhất</th>
+                                <th>Điểm thấp nhất</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var stat in Model.UserStatsList)
+                            {
+                                <tr>
+                                    <td>@stat.User.Id</td>
+                                    <td>@stat.User.Fullname</td>
+                                    <td>@stat.User.Username</td>
+                                    <td>
+                                        @if (stat.User.Badge != null)
+                                        {
+                                            <span>@stat.User.Badge.Name (Cấp @stat.User.Badge.BadgeLevel)</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Chưa có</span>
+                                        }
+                                    </td>
+                                    <td><strong class="text-primary">@stat.ExamCount</strong></td>
+                                    <td>@stat.AvgScore.ToString("F2")</td>
+                                    <td class="text-success">@stat.MaxScore.ToString("F2")</td>
+                                    <td class="text-warning">@stat.MinScore.ToString("F2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning">
+            Không tìm thấy người dùng nào.
+        </div>
+    }
+
+    <div class="mt-3">
+        <a asp-page="/Profile/Progress" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Quay lại trang cá nhân
+        </a>
+    </div>
+</div>

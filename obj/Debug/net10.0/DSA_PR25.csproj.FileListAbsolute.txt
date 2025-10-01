@@ -188,3 +188,4 @@ C:\Users\khainguyen\Desktop\DSA_PR25\bin\Debug\net10.0\BCrypt.Net-Next.dll
 C:\Users\khainguyen\Desktop\DSA_PR25\obj\Debug\net10.0\compressed\nr8jxbcf17-{0}-5ipweew5fc-5ipweew5fc.gz
 C:\Users\khainguyen\Desktop\DSA_PR25\obj\Debug\net10.0\compressed\chpdcuyi8f-{0}-5ipweew5fc-5ipweew5fc.gz
 C:\Users\khainguyen\Desktop\DSA_PR25\obj\Debug\net10.0\compressed\r450wtv7uh-{0}-5ipweew5fc-5ipweew5fc.gz
+C:\Users\khainguyen\Desktop\DSA_PR25\obj\Debug\net10.0\DSA_PR25.sourcelink.json

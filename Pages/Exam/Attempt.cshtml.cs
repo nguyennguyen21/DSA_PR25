@@ -71,6 +71,7 @@ public class AttemptModel : PageModel
         // Map sang ViewModel
         foreach (var q in questions)
         {
+            string processedContent = ProcessMathContent(q.Content ?? "");
             if (q.QuestionType == "mcq")
             {
                 var mc = await _context.Multiplechoiceexams
@@ -111,7 +112,7 @@ public class AttemptModel : PageModel
     public async Task<IActionResult> OnPostAsync(List<UserAnswer> Answers)
     {
         // Xác thực người dùng
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                        ?? User.FindFirst("Id")?.Value;
 
         if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
@@ -233,4 +234,34 @@ public class AttemptModel : PageModel
         public Guid QuestionId { get; set; }
         public string Response { get; set; } = string.Empty;
     }
+    
+    private string ProcessMathContent(string input)
+{
+    if (string.IsNullOrWhiteSpace(input))
+        return input;
+
+    // Nếu đã có $...$ rồi thì giữ nguyên
+    if (input.Contains("$"))
+        return input;
+
+    // Nếu chứa ký hiệu toán học → bao lại bằng $
+    // Các ký hiệu thường gặp: ^, \, {, }, _, /, +, -, =, π, √, v.v.
+    if (input.Contains("^") || 
+        input.Contains(@"\") || 
+        input.Contains("{") || 
+        input.Contains("}") ||
+        input.Contains("pi") ||
+        input.Contains("sqrt") ||
+        input.Contains("frac") ||
+        input.Contains("sum") ||
+        input.Contains("int") ||
+        input.Contains("∞") ||
+        input.Contains("√") ||
+        input.Contains("π"))
+    {
+        return "$" + input + "$";
+    }
+
+    return input;
+}
 }

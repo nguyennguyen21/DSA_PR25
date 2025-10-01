@@ -51,7 +51,7 @@ namespace DSA_PR25.Pages.Questions
                 QuestionType = "mcq", // Theo enum trong DB
                 Content = Input.Content,
                 Img = Input.Img,
-                CreatedBy = Guid.Parse("..."), // Thay bằng ID user thực tế (vd: từ HttpContext.User)
+                CreatedBy = Guid.Parse("00000000-0000-0000-0000-000000000000"), // Thay bằng ID user thực tế (vd: từ HttpContext.User)
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -85,7 +85,7 @@ namespace DSA_PR25.Pages.Questions
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToPage("./Index"); // Hoặc trang thành công
+            return RedirectToPage("/Admin/Questions/MQC/SeenMCQ"); // Hoặc trang thành công
         }
     }
 
